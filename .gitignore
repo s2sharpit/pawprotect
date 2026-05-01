@@ -1,0 +1,11 @@
+# Environment Variables (CRITICAL: Do not commit secrets)
+.env
+
+# Database Volumes
+mysql-data/
+
+# IDE and OS Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
