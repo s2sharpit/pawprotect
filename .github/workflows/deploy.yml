@@ -33,6 +33,8 @@ jobs:
             echo "AI_SERVICE_URL=${{ secrets.AI_SERVICE_URL }}" >> .env
             echo "AI_MODEL_NAME=${{ secrets.AI_MODEL_NAME }}" >> .env
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+            echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> .env
+            echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" >> .env
             
             # Rebuild and restart containers
             docker compose down

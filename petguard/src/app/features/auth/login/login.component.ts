@@ -89,24 +89,6 @@ import { User } from '@core/models/models';
                   </span>
                 }
               </button>
-
-            <!-- Demo Logins -->
-            <div class="border-t pt-4">
-              <p class="text-sm text-gray-600 text-center mb-3">Quick Demo Access</p>
-              <div class="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  (click)="demoLogin('user')"
-                  class="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-100 transition text-sm">
-                  Login as User
-                </button>
-                <button
-                  type="button"
-                  (click)="demoLogin('admin')"
-                  class="bg-purple-50 text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-purple-100 transition text-sm">
-                  Login as Admin
-                </button>
-              </div>
             </div>
           </div>
         </form>
@@ -180,22 +162,6 @@ export class LoginComponent {
         }
       });
     }
-  }
-
-  demoLogin(role: 'user' | 'admin') {
-    // For demo purposes - bypass actual authentication
-    if (role === 'user') {
-      this.loginForm.patchValue({
-        email: 'user@demo.com',
-        password: 'demo123'
-      });
-    } else {
-      this.loginForm.patchValue({
-        email: 'admin@demo.com',
-        password: 'admin123'
-      });
-    }
-    this.onSubmit();
   }
 
   navigateToRegister() {
