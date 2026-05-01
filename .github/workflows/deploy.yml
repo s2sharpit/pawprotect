@@ -18,6 +18,7 @@ jobs:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
+          passpharase: ${{ secrets.DO_SSH_PASSPHRASE }}
           script: |
             cd ~/pawprotect
             git pull origin main
