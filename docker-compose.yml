@@ -15,6 +15,12 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+        reservations:
+          memory: 128m
   app:
     build: ./backend
     restart: unless-stopped
@@ -36,6 +42,12 @@ services:
       timeout: 5s
       retries: 3
       start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 350m
+        reservations:
+          memory: 128m
     depends_on:
       mysqldb:
         condition: service_healthy
@@ -54,6 +66,12 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 200m
+        reservations:
+          memory: 64m
 
   frontend:
     build: ./petguard
@@ -77,6 +95,10 @@ services:
         condition: service_started
       ai:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 64m
 
 volumes:
   mysql-data:
