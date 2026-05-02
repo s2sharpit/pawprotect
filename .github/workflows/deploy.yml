@@ -36,6 +36,6 @@ jobs:
             echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> .env
             echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" >> .env
             
-            # Rebuild and restart containers
+            # Rebuild and restart containers sequentially to reduce server burden
             docker compose down
-            docker compose up -d --build
+            COMPOSE_PARALLEL_LIMIT=1 docker compose up -d --build
