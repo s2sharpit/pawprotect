@@ -38,4 +38,5 @@ jobs:
             
             # Rebuild and restart containers sequentially to reduce server burden
             docker compose down
+            docker compose build frontend
             COMPOSE_PARALLEL_LIMIT=1 docker compose up -d --build
