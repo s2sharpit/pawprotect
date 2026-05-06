@@ -57,6 +57,7 @@ jobs:
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
             echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> .env
             echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" >> .env
+            echo "APP_FRONTEND_URL=${{ secrets.APP_FRONTEND_URL }}" >> .env
             
             # Login to GHCR to pull images
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
