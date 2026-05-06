@@ -9,8 +9,6 @@ RUN npm ci
 
 # Copy source and build
 COPY . .
-# Limit Node memory to 1GB to prevent Out-Of-Memory errors during build
-ENV NODE_OPTIONS="--max-old-space-size=1024"
 RUN npm run build
 
 # Stage 2: Runtime

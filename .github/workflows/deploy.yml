@@ -5,13 +5,35 @@ on:
     branches:
       - main
 
+env:
+  REGISTRY: ghcr.io
+
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push images
+        run: |
+          docker compose build
+          docker compose push
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to Droplet
         uses: appleboy/ssh-action@master
         with:
@@ -36,7 +58,12 @@ jobs:
             echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> .env
             echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" >> .env
             
-            # Rebuild and restart containers sequentially to reduce server burden
-            docker compose down
-            docker compose build frontend
-            COMPOSE_PARALLEL_LIMIT=1 docker compose up -d --build
+            # Login to GHCR to pull images
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Pull pre-built images and restart without rebuilding
+            docker compose pull
+            docker compose up -d
+            
+            # Clean up old images to save space
+            docker image prune -af

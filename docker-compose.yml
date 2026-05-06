@@ -18,6 +18,7 @@ services:
       retries: 3
       start_period: 30s
   app:
+    image: ghcr.io/s2sharpit/pawprotect-backend:latest
     build: ./backend
     restart: unless-stopped
     environment:
@@ -46,6 +47,7 @@ services:
       ai:
         condition: service_healthy
   ai:
+    image: ghcr.io/s2sharpit/pawprotect-ai:latest
     build: ./petguard-ai
     restart: unless-stopped
     environment:
@@ -63,6 +65,7 @@ services:
       start_period: 10s
 
   frontend:
+    image: ghcr.io/s2sharpit/pawprotect-frontend:latest
     build: ./petguard
     restart: unless-stopped
     environment:
