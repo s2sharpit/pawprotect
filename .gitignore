@@ -4,6 +4,9 @@
 # Database Volumes
 mysql-data/
 
+# SSL / Certbot (CRITICAL: Do not commit private keys)
+certbot/
+
 # IDE and OS Files
 .vscode/
 .idea/

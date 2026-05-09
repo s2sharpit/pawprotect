@@ -1,6 +1,6 @@
-import { Component, Output, EventEmitter, signal } from '@angular/core';
+import { Component, Output, EventEmitter, signal, inject } from '@angular/core';
 import { AiService } from '@core/services/ai.service';
-import { PetService } from '@core/services/pet.service';
+import { PetStore } from '@core/store/pet.store';
 import { Pet } from '@core/models/models';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -31,7 +31,7 @@ import { FormsModule } from '@angular/forms';
           class="w-full px-3 py-2 rounded-lg border border-purple-200 focus:border-purple-500 outline-none"
           >
           <option [ngValue]="undefined">-- No Pet Selected --</option>
-          @for (pet of pets(); track pet) {
+          @for (pet of petStore.pets(); track pet) {
             <option [ngValue]="pet.id">
               {{ pet.name }} ({{ pet.species }})
             </option>
@@ -106,7 +106,6 @@ import { FormsModule } from '@angular/forms';
 export class ChatbotComponent {
   @Output() close = new EventEmitter<void>();
 
-  pets = signal<Pet[]>([]);
   petId = signal<number | undefined>(undefined);
   chatMessages = signal<{ text: string; isUser: boolean }[]>([
     { text: "Hello! I'm your AI pet health assistant. How can I help you today?", isUser: false },
@@ -114,11 +113,13 @@ export class ChatbotComponent {
   chatInput = signal<string>('');
   loading = signal<boolean>(false);
 
-  constructor(private aiService: AiService, private petService: PetService) {
-    this.petService.getPets().subscribe({
-      next: (pets) => this.pets.set(pets || []),
-      error: () => this.pets.set([]),
-    });
+  private aiService = inject(AiService);
+  public petStore = inject(PetStore);
+
+  constructor() {
+    if (this.petStore.pets().length === 0) {
+      this.petStore.loadPets();
+    }
   }
 
   sendMessage() {

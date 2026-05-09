@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { PetService } from '@core/services/pet.service';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { PetStore } from '@core/store/pet.store';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { firstValueFrom } from 'rxjs';
+import { OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-my-pets',
@@ -23,27 +22,27 @@ import { firstValueFrom } from 'rxjs';
         </button>
       </div>
 
-      <!-- Loading (resource.loading()) -->
-      @if (petsResource.isLoading()) {
+      <!-- Loading -->
+      @if (petStore.isLoading()) {
         <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
           <div class="text-6xl mb-4">⏳</div>
           <p class="text-gray-600">Loading pets...</p>
         </div>
       }
 
-      <!-- Error (resource.error()) -->
-      @if (petsResource.error(); as error) {
+      <!-- Error -->
+      @if (petStore.error(); as error) {
         <div class="bg-red-50 rounded-2xl shadow-lg p-6 text-center">
           <div class="text-4xl mb-2">❌</div>
-          <p class="text-red-600 mb-4">{{ error.message || 'Failed to load pets' }}</p>
-          <button (click)="petsResource.reload()" class="btn-primary">Try Again</button>
+          <p class="text-red-600 mb-4">{{ error }}</p>
+          <button (click)="petStore.loadPets()" class="btn-primary">Try Again</button>
         </div>
       }
 
-      <!-- Pets Grid (resource.value()) -->
-      @if (petsResource.hasValue() && petsResource.value().length > 0) {
+      <!-- Pets Grid -->
+      @if (!petStore.isLoading() && petStore.pets().length > 0) {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          @for (pet of petsResource.value(); track pet.id) {
+          @for (pet of petStore.pets(); track pet.id) {
             <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
               <div class="bg-linear-to-br from-purple-400 to-pink-400 h-40 flex items-center justify-center">
                 <span class="text-7xl">{{ getPetEmoji(pet.species | titlecase) }}</span>
@@ -85,8 +84,8 @@ import { firstValueFrom } from 'rxjs';
             </div>
           }
         </div>
-      } @else {
-        <!-- No Pets (success but empty) -->
+      } @else if (!petStore.isLoading() && !petStore.error()) {
+        <!-- No Pets -->
         <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
           <div class="text-6xl mb-4">🐾</div>
           <h3 class="text-2xl font-bold text-gray-800 mb-2">No pets yet</h3>
@@ -97,14 +96,13 @@ import { firstValueFrom } from 'rxjs';
     </div>
   `,
 })
-export class MyPetsComponent {
-  private petService = inject(PetService);
+export class MyPetsComponent implements OnInit {
+  public petStore = inject(PetStore);
   private snackBar = inject(MatSnackBar);
 
-  // ONE LINE replaces: pets, isLoading, errorMessage, hasError, hasPets, ngOnInit, loadPets subscribe!
-  petsResource = rxResource({
-    stream: () => this.petService.getPets(),
-  });
+  ngOnInit() {
+    this.petStore.loadPets();
+  }
 
   getPetEmoji(species: string): string {
     const emojis: Record<string, string> = {
@@ -128,16 +126,14 @@ export class MyPetsComponent {
     }
 
     try {
-      await firstValueFrom(this.petService.deletePet(id));
+      this.petStore.deletePet(id);
       this.snackBar.open(`${name} has been removed successfully.`, 'Ok', {
         duration: 3000,
         panelClass: ['success-snackbar']
       });
-      // Refresh the resource
-      this.petsResource.reload();
     } catch (error: any) {
       this.snackBar.open(
-        error.error?.message || `Failed to delete ${name}.`,
+        error.message || `Failed to delete ${name}.`,
         'Dismiss',
         { duration: 5000, panelClass: ['error-snackbar'] }
       );

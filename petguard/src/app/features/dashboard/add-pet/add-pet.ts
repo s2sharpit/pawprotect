@@ -1,5 +1,5 @@
 
-import { Component, signal, computed, effect } from '@angular/core';
+import { Component, signal, computed, effect, inject } from '@angular/core';
 import {
   FormBuilder,
   Validators,
@@ -10,7 +10,7 @@ import {
 import { Router, RouterModule } from '@angular/router';
 // ...existing code...
 import { AiService } from '@core/services/ai.service';
-import { PetService } from '@core/services/pet.service';
+import { PetStore } from '@core/store/pet.store';
 
 @Component({
   selector: 'app-add-pet',
@@ -178,9 +178,10 @@ export class AddPet {
   eligibilityResult = signal<any>(null);
   petForm = signal<FormGroup | null>(null);
 
+  public petStore = inject(PetStore);
+
   constructor(
     private fb: NonNullableFormBuilder,
-    private petService: PetService,
     private router: Router,
     private aiService: AiService
   ) { }
@@ -266,13 +267,9 @@ export class AddPet {
           payload.preExistingConditions = [];
         }
       }
-      this.petService.addPet(payload).subscribe({
-        next: () => {
-          this.router.navigate(['/dashboard/pets']);
-        },
-        error: (error) => {
-          console.error('Error adding pet:', error);
-        },
+      this.petStore.addPet({
+        petData: payload,
+        onSuccess: () => this.router.navigate(['/dashboard/pets'])
       });
     }
   }

@@ -1,93 +1,60 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
-import { User } from '@core/models/models';
 import { API_ENDPOINTS } from '@core/constants/api.endpoints';
+import { AuthStore } from '@core/store/auth.store';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private authStore = inject(AuthStore);
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-    // Check if user is already logged in (browser only)
-    if (isPlatformBrowser(this.platformId)) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        this.loadCurrentUser();
-      }
-    }
+  constructor() {
+    this.authStore.loadFromStorage();
   }
 
   register(userData: any): Observable<any> {
+    this.authStore.setLoading(true);
     return this.http.post(API_ENDPOINTS.AUTH.REGISTER, userData).pipe(
-      tap((response: any) => {
-        if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('user', JSON.stringify(response));
+      tap({
+        next: (response: any) => {
+          this.authStore.loginSuccess(response);
+        },
+        error: (err) => {
+          this.authStore.setError(err.message || 'Registration failed');
         }
-        this.currentUserSubject.next(response);
       })
     );
   }
 
   login(email: string, password: string): Observable<any> {
+    this.authStore.setLoading(true);
     return this.http.post(API_ENDPOINTS.AUTH.LOGIN, { email, password }).pipe(
-      tap((response: any) => {
-        if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('user', JSON.stringify(response));
+      tap({
+        next: (response: any) => {
+          this.authStore.loginSuccess(response);
+        },
+        error: (err) => {
+          this.authStore.setError(err.message || 'Login failed');
         }
-        this.currentUserSubject.next(response);
       })
     );
   }
 
   logout(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    }
-    this.currentUserSubject.next(null);
+    this.authStore.logout();
     this.router.navigate(['/login']);
   }
 
-  private loadCurrentUser(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      const userJson = localStorage.getItem('user');
-      if (userJson) {
-        try {
-          const user = JSON.parse(userJson);
-          this.currentUserSubject.next(user);
-        } catch (e) {
-          console.error('Error parsing user from localStorage', e);
-          this.logout();
-        }
-      }
-    }
-  }
-
   isAuthenticated(): boolean {
-    if (isPlatformBrowser(this.platformId)) {
-      return !!localStorage.getItem('token');
-    }
-    // Return false on server to ensure consistent state during hydration
-    return false;
+    return this.authStore.isAuthenticated();
   }
 
   isAdmin(): boolean {
-    if (!isPlatformBrowser(this.platformId)) {
-      return false; // Assume user on server
-    }
-    const user = this.currentUserSubject.value;
-    return user?.role === 'ADMIN';
+    return this.authStore.isAdmin();
   }
 }

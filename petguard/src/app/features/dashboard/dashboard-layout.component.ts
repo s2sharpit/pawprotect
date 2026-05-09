@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '@core/services/auth.service';
+import { AuthStore } from '@core/store/auth.store';
 import { ChatbotComponent } from './chatbot.component';
 
 @Component({
@@ -41,8 +42,8 @@ import { ChatbotComponent } from './chatbot.component';
               <span class="text-lg">👤</span>
             </div>
             <div class="flex-1">
-              <p class="font-semibold text-sm">{{ currentUser?.fullName || 'User' }}</p>
-              <p class="text-xs text-white/70">{{ currentUser?.email }}</p>
+              <p class="font-semibold text-sm">{{ authStore.user()?.fullName || 'User' }}</p>
+              <p class="text-xs text-white/70">{{ authStore.user()?.email }}</p>
             </div>
           </div>
           <button
@@ -123,10 +124,9 @@ export class DashboardLayoutComponent {
   chatbotOpen = false;
   // Chatbot state moved to ChatbotComponent
 
+  public authStore = inject(AuthStore);
+
   constructor(private authService: AuthService, private router: Router) {
-    this.authService.currentUser$.subscribe((user) => {
-      this.currentUser = user;
-    });
   }
 
   getPageTitle(): string {

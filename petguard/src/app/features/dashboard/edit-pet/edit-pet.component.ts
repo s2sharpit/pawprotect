@@ -7,6 +7,7 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { PetService } from '@core/services/pet.service';
+import { PetStore } from '@core/store/pet.store';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map, switchMap, tap } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -128,6 +129,7 @@ import { Pet } from '@core/models/models';
 export class EditPetComponent {
   private fb = inject(FormBuilder);
   private petService = inject(PetService);
+  private petStore = inject(PetStore);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -181,14 +183,12 @@ export class EditPetComponent {
         payload.preExistingConditions = [];
       }
 
-      this.petService.updatePet(this.petId(), payload).subscribe({
-        next: () => {
+      this.petStore.updatePet({
+        id: this.petId(),
+        petData: payload,
+        onSuccess: () => {
           this.isSubmitting.set(false);
           this.router.navigate(['/dashboard/pets', this.petId()]);
-        },
-        error: (err) => {
-          this.isSubmitting.set(false);
-          alert('Failed to update pet details.');
         }
       });
     }

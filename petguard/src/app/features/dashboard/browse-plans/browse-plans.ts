@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { InsurancePlan, Pet } from '@core/models/models';
 import { PlanService } from '@core/services/plan.service';
 import { PolicyService } from '@core/services/policy.service';
-import { PetService } from '@core/services/pet.service';
+import { PetStore } from '@core/store/pet.store';
 import { PlanComparison } from './plan-comparison';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -24,12 +24,12 @@ import { Router } from '@angular/router';
       <!-- Pet Selection -->
       <section class="bg-white rounded-xl shadow-lg p-6">
         <label class="block text-sm font-semibold text-gray-700 mb-3">Select Pet</label>
-        @if (pets().length === 0) {
+        @if (petStore.pets().length === 0 && petStore.isLoading()) {
         <div class="h-12 bg-gray-200 rounded animate-pulse"></div>
         } @else {
         <select [(ngModel)]="selectedPetId" class="input-field max-w-md">
           <option [ngValue]="null">Choose a pet...</option>
-          @for (pet of pets(); track pet.id) {
+          @for (pet of petStore.pets(); track pet.id) {
           <option [ngValue]="pet.id">{{ pet.name }} ({{ pet.breed }})</option>
           }
         </select>
@@ -133,7 +133,7 @@ import { Router } from '@angular/router';
 export class BrowsePlans {
   private planService = inject(PlanService);
   private policyService = inject(PolicyService);
-  private petService = inject(PetService);
+  public petStore = inject(PetStore);
   private snacBar = inject(MatSnackBar);
   private router = inject(Router);
 
@@ -141,9 +141,14 @@ export class BrowsePlans {
   plans: Signal<InsurancePlan[]> = toSignal(this.planService.getActivePlans(), {
     initialValue: [],
   });
-  pets: Signal<Pet[]> = toSignal(this.petService.getPets(), { initialValue: [] });
 
   selectedPetId = signal<number | null>(null);
+
+  constructor() {
+    if (this.petStore.pets().length === 0) {
+      this.petStore.loadPets();
+    }
+  }
 
   // Precomputed statics
   planIcons = ['🥉', '🥈', '🥇'] as const;
