@@ -2,6 +2,7 @@ import {
   ApplicationConfig,
   importProvidersFrom,
   provideBrowserGlobalErrorListeners,
+  APP_INITIALIZER
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
@@ -11,6 +12,11 @@ import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/
 import { authInterceptor } from '@core/interceptors/auth.interceptor';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '@core/services/auth.service';
+
+export function initializeAuth(authService: AuthService) {
+  return () => authService.getMe();
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,5 +26,11 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     provideAnimations(),
     importProvidersFrom(FormsModule),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeAuth,
+      deps: [AuthService],
+      multi: true
+    }
   ],
 };

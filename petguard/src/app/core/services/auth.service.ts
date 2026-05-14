@@ -1,6 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { API_ENDPOINTS } from '@core/constants/api.endpoints';
 import { AuthStore } from '@core/store/auth.store';
@@ -12,9 +13,23 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private authStore = inject(AuthStore);
+  private platformId = inject(PLATFORM_ID);
 
-  constructor() {
-    this.authStore.loadFromStorage();
+  getMe(): Observable<any> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return of(null);
+    }
+    return this.http.get(API_ENDPOINTS.AUTH.ME).pipe(
+      tap({
+        next: (response: any) => {
+          this.authStore.loginSuccess(response);
+        },
+        error: () => {
+          this.authStore.logout();
+        }
+      }),
+      catchError(() => of(null))
+    );
   }
 
   register(userData: any): Observable<any> {
@@ -46,8 +61,16 @@ export class AuthService {
   }
 
   logout(): void {
-    this.authStore.logout();
-    this.router.navigate(['/login']);
+    this.http.post(API_ENDPOINTS.AUTH.LOGOUT, {}).subscribe({
+      next: () => {
+        this.authStore.logout();
+        this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.authStore.logout();
+        this.router.navigate(['/login']);
+      }
+    });
   }
 
   isAuthenticated(): boolean {
