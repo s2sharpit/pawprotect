@@ -70,6 +70,7 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+      - BACKEND_URL=http://app:8080
     # Build first to manage resources, independent of backend status
     # depends_on:
     #   - app

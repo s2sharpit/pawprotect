@@ -16,9 +16,6 @@ export class AuthService {
   private platformId = inject(PLATFORM_ID);
 
   getMe(): Observable<any> {
-    if (!isPlatformBrowser(this.platformId)) {
-      return of(null);
-    }
     return this.http.get(API_ENDPOINTS.AUTH.ME).pipe(
       tap({
         next: (response: any) => {

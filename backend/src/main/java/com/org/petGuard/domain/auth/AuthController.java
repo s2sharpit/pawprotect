@@ -21,7 +21,7 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
-    
+
     @Autowired
     private UserRepository userRepository;
 
@@ -44,7 +44,7 @@ public class AuthController {
                 .secure(true)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -56,14 +56,20 @@ public class AuthController {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
-        User user = userRepository.findById(principal.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
         
+        String fullName = principal.getFullName();
+        if (fullName == null) {
+            // Fallback for older tokens that don't have fullName claim
+            User user = userRepository.findById(principal.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            fullName = user.getFullName();
+        }
+
         AuthResponse response = AuthResponse.builder()
-                .userId(user.getId())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .role(user.getRole().name())
+                .userId(principal.getUserId())
+                .email(principal.getEmail())
+                .fullName(fullName)
+                .role(principal.getRole())
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -74,12 +80,13 @@ public class AuthController {
                 .secure(true)
                 .path("/")
                 .maxAge(24 * 60 * 60) // 1 day
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
-        
-        // Remove token from response body to prevent storing it in JS memory/localStorage
+
+        // Remove token from response body to prevent storing it in JS
+        // memory/localStorage
         response.setToken(null);
-        
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(response);

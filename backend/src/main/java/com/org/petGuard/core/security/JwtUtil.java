@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import jakarta.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import java.util.Date;
 
@@ -16,27 +17,43 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
     
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+    private SecretKey key;
+    
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
     }
     
-    public String generateToken(String email, Long userId, String role) {
+    public String generateToken(String email, Long userId, String role, String fullName) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("userId", userId)
                 .claim("role", role)
+                .claim("fullName", fullName)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigningKey())
+                .signWith(key)
                 .compact();
     }
     
     public Claims extractClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+    
+    public Claims validateAndGetClaims(String token) {
+        try {
+            Claims claims = extractClaims(token);
+            if (!claims.getExpiration().before(new Date())) {
+                return claims;
+            }
+        } catch (JwtException | IllegalArgumentException e) {
+            // Invalid token
+        }
+        return null;
     }
     
     public String extractEmail(String token) {
@@ -56,11 +73,6 @@ public class JwtUtil {
     }
     
     public boolean validateToken(String token) {
-        try {
-            extractClaims(token);
-            return !isTokenExpired(token);
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
+        return validateAndGetClaims(token) != null;
     }
 }

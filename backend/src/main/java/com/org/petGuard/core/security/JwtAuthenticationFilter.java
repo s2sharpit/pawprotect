@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
+import io.jsonwebtoken.Claims;
 
 @Component
 @RequiredArgsConstructor
@@ -50,12 +51,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         
         if (token != null) {
-            if (jwtUtil.validateToken(token)) {
-                String email = jwtUtil.extractEmail(token);
-                Long userId = jwtUtil.extractUserId(token);
-                String role = jwtUtil.extractRole(token);
+            Claims claims = jwtUtil.validateAndGetClaims(token);
+            if (claims != null) {
+                String email = claims.getSubject();
+                Long userId = claims.get("userId", Long.class);
+                String role = claims.get("role", String.class);
+                String fullName = claims.get("fullName", String.class);
                 
-                UserPrincipal principal = new UserPrincipal(userId, email, role);
+                UserPrincipal principal = new UserPrincipal(userId, email, role, fullName);
                 
                 UsernamePasswordAuthenticationToken authentication = 
                     new UsernamePasswordAuthenticationToken(
