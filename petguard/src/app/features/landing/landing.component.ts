@@ -15,7 +15,9 @@ import { Router } from '@angular/router';
             <span class="text-4xl">🐾</span>
             <span class="text-2xl font-bold text-white">PawProtect</span>
           </div>
-          <div class="flex items-center space-x-4">
+
+          <!-- Desktop Nav -->
+          <div class="hidden sm:flex items-center space-x-4">
             <button (click)="navigateToLogin()"
               class="text-white hover:text-white/80 font-semibold transition">
               Login
@@ -25,16 +27,44 @@ import { Router } from '@angular/router';
               Get Started
             </button>
           </div>
+
+          <!-- Mobile Hamburger -->
+          <button
+            class="sm:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
+            (click)="mobileMenuOpen = !mobileMenuOpen"
+            aria-label="Toggle menu">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              @if (mobileMenuOpen) {
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              } @else {
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              }
+            </svg>
+          </button>
         </div>
+
+        <!-- Mobile Menu Dropdown -->
+        @if (mobileMenuOpen) {
+          <div class="sm:hidden bg-white/10 backdrop-blur-md border-t border-white/20 px-6 py-4 flex flex-col space-y-3">
+            <button (click)="navigateToLogin(); mobileMenuOpen = false"
+              class="text-white font-semibold text-left py-2 hover:text-white/80 transition">
+              Login
+            </button>
+            <button (click)="navigateToRegister(); mobileMenuOpen = false"
+              class="bg-white text-purple-600 px-6 py-2 rounded-full font-bold text-center hover:scale-105 transform transition shadow-lg">
+              Get Started
+            </button>
+          </div>
+        }
       </nav>
     
       <!-- Hero Section -->
-      <div class="container mx-auto px-6 py-20 text-center">
+      <div class="container mx-auto px-6 py-12 md:py-20 text-center">
         <div class="animate-fade-in">
-          <h1 class="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
+          <h1 class="text-4xl sm:text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
             Protect Your<br />Furry Friends 🐾
           </h1>
-          <p class="text-xl md:text-2xl text-white/90 mb-12 max-w-2xl mx-auto">
+          <p class="text-lg md:text-xl text-white/90 mb-10 md:mb-12 max-w-2xl mx-auto">
             AI-powered pet insurance made simple. Get instant eligibility checks and claim approvals.
           </p>
           <div class="flex flex-col sm:flex-row justify-center gap-4">
@@ -76,7 +106,7 @@ import { Router } from '@angular/router';
       <div class="bg-white/10 backdrop-blur-md py-20 mt-20">
         <div class="container mx-auto px-6">
           <h2 class="text-4xl font-bold text-white text-center mb-16">How It Works</h2>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             @for (step of steps; track step; let i = $index) {
               <div
                 class="text-center">
@@ -123,6 +153,8 @@ export class LandingComponent {
     { title: 'Choose Plan', description: 'Select the perfect coverage' },
     { title: 'Get Protected', description: 'Submit claims anytime' }
   ];
+
+  mobileMenuOpen = false;
 
   constructor(private router: Router) {}
 

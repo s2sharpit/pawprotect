@@ -19,7 +19,7 @@ import { PetStore } from '@core/store/pet.store';
   template: `
     <div class="max-w-3xl mx-auto">
       <div class="bg-white rounded-2xl shadow-lg p-8">
-        <h2 class="text-3xl font-bold text-gray-800 mb-6">Add New Pet 🐾</h2>
+        <h2 class="text-xl md:text-3xl font-bold text-gray-800 mb-6">Add New Pet 🐾</h2>
     
         <!-- File Upload Only -->
         <div class="space-y-6">
@@ -80,10 +80,10 @@ import { PetStore } from '@core/store/pet.store';
                 (ngSubmit)="onSubmit()"
                 class="space-y-6 animate-slide-down"
                 >
-                <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-xl font-bold text-gray-800">Pet Details extracted</h3>
-                  <span class="bg-green-100 text-green-600 px-4 py-2 rounded-full font-semibold flex items-center">
-                    <span class="mr-2">✓</span> AI Extraction Complete
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                  <h3 class="text-lg md:text-xl font-bold text-gray-800">Pet Details extracted</h3>
+                  <span class="bg-green-100 text-green-600 px-3 py-1.5 rounded-full font-semibold flex items-center gap-1 whitespace-nowrap shrink-0 text-sm">
+                    <span>✓</span> AI Extraction Complete
                   </span>
                 </div>
 
@@ -125,7 +125,7 @@ import { PetStore } from '@core/store/pet.store';
                     placeholder="e.g. Arthritis, Diabetes (comma separated)"
                   />
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Eligibility Status</label>
                     <input
@@ -144,7 +144,7 @@ import { PetStore } from '@core/store/pet.store';
                   </div>
                 </div>
     
-                <div class="flex space-x-4">
+                <div class="flex flex-col sm:flex-row gap-3">
                   <button type="button" [routerLink]="['/dashboard/pets']" class="btn-secondary flex-1">
                     Cancel
                   </button>

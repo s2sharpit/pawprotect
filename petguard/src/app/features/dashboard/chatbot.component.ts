@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   template: `
     <div
-      class="fixed bottom-24 right-6 w-96 bg-white rounded-2xl shadow-2xl z-50 flex flex-col animate-slide-up"
+      class="fixed bottom-24 right-0 md:right-6 w-full md:w-96 bg-white md:rounded-2xl rounded-t-2xl shadow-2xl z-50 flex flex-col animate-slide-up"
       style="height: 500px;"
       >
       <div

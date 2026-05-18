@@ -9,8 +9,8 @@ import { Router } from "@angular/router";
   standalone: true,
   imports: [ReactiveFormsModule],
   template: `
-    <div class="min-h-screen bg-linear-to-br from-purple-600 to-pink-500 flex items-center justify-center p-6">
-      <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md animate-slide-up">
+    <div class="min-h-screen bg-linear-to-br from-purple-600 to-pink-500 flex items-center justify-center p-4 sm:p-6">
+      <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 w-full max-w-md animate-slide-up">
         <!-- Logo -->
         <div class="text-center mb-8">
           <div class="text-6xl mb-4">🐾</div>

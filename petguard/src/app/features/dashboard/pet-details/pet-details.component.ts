@@ -48,11 +48,11 @@ import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
               </div>
             </div>
             
-            <div class="p-8">
-              <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="p-5 md:p-8">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h1 class="text-4xl font-black text-gray-800 mb-2">{{ pet.name }}</h1>
-                  <div class="flex flex-wrap gap-3">
+                  <h1 class="text-3xl md:text-4xl font-black text-gray-800 mb-2">{{ pet.name }}</h1>
+                  <div class="flex flex-wrap gap-2">
                     <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wider">
                       {{ pet.breed }}
                     </span>
@@ -68,17 +68,17 @@ import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
                   </div>
                 </div>
                 
-                <div class="flex space-x-3">
+                <div class="flex flex-col sm:flex-row gap-3">
                   <button 
                     [routerLink]="['edit']"
-                    class="btn-secondary px-6"
+                    class="btn-secondary"
                   >
                     Edit Profile ✏️
                   </button>
                   <button 
                     [routerLink]="['/dashboard/claims/submit']"
                     [queryParams]="{ petId: pet.id }"
-                    class="btn-primary px-6"
+                    class="btn-primary"
                   >
                     File a Claim 📄
                   </button>

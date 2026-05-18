@@ -12,13 +12,13 @@ import { API_ENDPOINTS } from "@core/constants/api.endpoints";
   template: `
     <div class="space-y-6">
       <!-- Welcome Banner -->
-      <div class="bg-linear-to-r from-purple-500 to-pink-500 rounded-2xl p-8 text-white">
-        <h2 class="text-3xl font-bold mb-2">Welcome back! 👋</h2>
+      <div class="bg-linear-to-r from-purple-500 to-pink-500 rounded-2xl p-6 md:p-8 text-white">
+        <h2 class="text-2xl md:text-3xl font-bold mb-2">Welcome back! 👋</h2>
         <p class="text-white/90">Here's what's happening with your pets today.</p>
       </div>
     
       <!-- Quick Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         @for (stat of stats(); track stat) {
           <div
             class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
@@ -53,13 +53,13 @@ import { API_ENDPOINTS } from "@core/constants/api.endpoints";
         <div class="space-y-4">
           @for (activity of recentActivity(); track activity) {
             <div
-              class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-              <div class="text-2xl">{{ activity.icon }}</div>
-              <div class="flex-1">
-                <p class="font-semibold text-gray-800">{{ activity.title }}</p>
-                <p class="text-sm text-gray-600">{{ activity.description }}</p>
+              class="flex items-start space-x-3 p-3 md:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+              <div class="text-xl md:text-2xl shrink-0">{{ activity.icon }}</div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-gray-800 text-sm md:text-base leading-tight">{{ activity.title }}</p>
+                <p class="text-xs text-purple-400 mt-0.5">{{ activity.time }}</p>
+                <p class="text-xs md:text-sm text-gray-600 mt-0.5">{{ activity.description }}</p>
               </div>
-              <div class="text-sm text-gray-500">{{ activity.time }}</div>
             </div>
           }
         </div>

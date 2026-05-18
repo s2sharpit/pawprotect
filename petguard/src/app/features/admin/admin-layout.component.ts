@@ -9,10 +9,23 @@ import { API_ENDPOINTS } from "@core/constants/api.endpoints";
   standalone: true,
   imports: [RouterModule],
   template: `
-    <div class="flex h-screen bg-gray-50">
+    <div class="flex h-screen bg-gray-50 overflow-hidden">
+
+      <!-- Mobile Backdrop -->
+      @if (sidebarOpen) {
+        <div
+          class="fixed inset-0 bg-black/40 z-30 md:hidden"
+          (click)="sidebarOpen = false">
+        </div>
+      }
+
       <!-- Sidebar -->
-      <aside class="w-64 bg-linear-to-b from-gray-900 to-gray-800 text-white shrink-0">
-        <div class="p-6">
+      <aside
+        class="fixed inset-y-0 left-0 z-40 w-64 bg-linear-to-b from-gray-900 to-gray-800 text-white flex flex-col transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:shrink-0"
+        [class.-translate-x-full]="!sidebarOpen"
+        [class.translate-x-0]="sidebarOpen">
+
+        <div class="p-6 flex-1 overflow-y-auto">
           <div class="flex items-center space-x-2 mb-8">
             <span class="text-3xl">👨‍💼</span>
             <div>
@@ -20,13 +33,14 @@ import { API_ENDPOINTS } from "@core/constants/api.endpoints";
               <span class="text-xs text-gray-400">PawProtect</span>
             </div>
           </div>
-    
+
           <!-- Navigation -->
           <nav class="space-y-2">
             @for (item of adminMenuItems; track item) {
               <a
                 [routerLink]="item.path"
                 routerLinkActive="bg-white/10"
+                (click)="sidebarOpen = false"
                 class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/5 transition cursor-pointer">
                 <span class="text-xl">{{ item.icon }}</span>
                 <span class="font-medium">{{ item.label }}</span>
@@ -34,16 +48,16 @@ import { API_ENDPOINTS } from "@core/constants/api.endpoints";
             }
           </nav>
         </div>
-    
+
         <!-- Admin Profile -->
-        <div class="absolute bottom-0 w-64 p-6 border-t border-white/10">
+        <div class="w-full p-6 border-t border-white/10">
           <div class="flex items-center space-x-3 mb-4">
             <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
               <span class="text-lg">👨‍💼</span>
             </div>
-            <div class="flex-1">
-              <p class="font-semibold text-sm">Admin User</p>
-              <p class="text-xs text-gray-400">admin@pawprotect.com</p>
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-sm truncate">Admin User</p>
+              <p class="text-xs text-gray-400 truncate">admin&#64;pawprotect.com</p>
             </div>
           </div>
           <button (click)="logout()"
@@ -53,14 +67,25 @@ import { API_ENDPOINTS } from "@core/constants/api.endpoints";
           </button>
         </div>
       </aside>
-    
+
       <!-- Main Content -->
-      <main class="flex-1 overflow-y-auto">
+      <main class="flex-1 overflow-y-auto min-w-0">
         <!-- Top Bar -->
-        <header class="bg-white border-b border-gray-200 px-8 py-4">
+        <header class="bg-white border-b border-gray-200 px-4 md:px-8 py-4 sticky top-0 z-20">
           <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold text-gray-800">{{ getPageTitle() }}</h1>
-    
+            <div class="flex items-center space-x-3">
+              <!-- Hamburger (mobile only) -->
+              <button
+                class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
+                (click)="sidebarOpen = !sidebarOpen"
+                aria-label="Toggle sidebar">
+                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+              </button>
+              <h1 class="text-xl md:text-2xl font-bold text-gray-800">{{ getPageTitle() }}</h1>
+            </div>
+
             <div class="flex items-center space-x-4">
               <button class="relative p-2 hover:bg-gray-100 rounded-lg transition">
                 <span class="text-xl">🔔</span>
@@ -71,9 +96,9 @@ import { API_ENDPOINTS } from "@core/constants/api.endpoints";
             </div>
           </div>
         </header>
-    
+
         <!-- Content Area -->
-        <div class="p-8">
+        <div class="p-4 md:p-8">
           <router-outlet></router-outlet>
         </div>
       </main>
@@ -87,6 +112,8 @@ export class AdminLayoutComponent {
     { path: '/admin/plans', icon: '📋', label: 'Manage Plans' },
     { path: '/admin/users', icon: '👥', label: 'Manage Users' }
   ];
+
+  sidebarOpen = false;
 
   constructor(private router: Router) {}
 
@@ -177,13 +204,13 @@ export class AdminLayoutComponent {
         <div class="space-y-3">
           @for (activity of recentActivity(); track activity) {
             <div
-              class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-              <div class="text-2xl">{{ activity.icon }}</div>
-              <div class="flex-1">
-                <p class="font-semibold text-gray-800">{{ activity.title }}</p>
-                <p class="text-sm text-gray-600">{{ activity.description }}</p>
+              class="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+              <div class="text-2xl shrink-0">{{ activity.icon }}</div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-gray-800 leading-tight">{{ activity.title }}</p>
+                <p class="text-xs text-purple-400 mt-0.5">{{ activity.time }}</p>
+                <p class="text-sm text-gray-600 mt-0.5">{{ activity.description }}</p>
               </div>
-              <div class="text-sm text-gray-500">{{ activity.time }}</div>
             </div>
           }
         </div>

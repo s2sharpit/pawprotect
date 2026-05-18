@@ -12,7 +12,7 @@ import { OnInit } from '@angular/core';
   template: `
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-2xl font-bold text-gray-800">My Pets</h2>
           <p class="text-gray-600">Manage your furry friends</p>

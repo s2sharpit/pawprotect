@@ -17,12 +17,12 @@ import { InsurancePlan } from '@core/models/models';
   template: `
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 class="text-2xl font-bold text-gray-800">Manage Insurance Plans</h2>
-          <p class="text-gray-600">Create and edit insurance plan offerings</p>
+          <h2 class="text-xl md:text-2xl font-bold text-gray-800">Manage Insurance Plans</h2>
+          <p class="text-gray-600 text-sm">Create and edit insurance plan offerings</p>
         </div>
-        <button (click)="showCreateForm.set(true)" class="btn-primary flex items-center space-x-2">
+        <button (click)="showCreateForm.set(true)" class="btn-primary flex items-center space-x-2 shrink-0">
           <span>➕</span>
           <span>Create New Plan</span>
         </button>
@@ -37,7 +37,7 @@ import { InsurancePlan } from '@core/models/models';
             {{ editingPlan() ? 'Edit Plan' : 'Create New Plan' }}
           </h3>
           <form [formGroup]="planForm" (ngSubmit)="savePlan()" class="space-y-6">
-            <div class="grid grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Plan Name *</label>
                 <input
@@ -132,7 +132,7 @@ import { InsurancePlan } from '@core/models/models';
                                 >
                               </label>
                             </div>
-                            <div class="flex space-x-4">
+                            <div class="flex flex-col sm:flex-row gap-3">
                               <button type="button" (click)="cancelForm()" class="btn-secondary flex-1">
                                 Cancel
                               </button>
@@ -146,7 +146,8 @@ import { InsurancePlan } from '@core/models/models';
     
                       <!-- Plans Table -->
                       <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-                        <table class="w-full">
+                        <div class="overflow-x-auto">
+                        <table class="w-full min-w-[600px]">
                           <thead class="bg-gray-50 border-b-2 border-gray-200">
                             <tr>
                               <th class="text-left px-6 py-4 font-semibold text-gray-700">Plan Name</th>
@@ -205,6 +206,7 @@ import { InsurancePlan } from '@core/models/models';
                             }
                           </tbody>
                         </table>
+                        </div>
                       </div>
                     </div>
     `,

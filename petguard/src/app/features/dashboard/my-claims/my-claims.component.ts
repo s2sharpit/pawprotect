@@ -10,7 +10,7 @@ import { Claim } from '@core/models/models';
   imports: [RouterModule],
   template: `
     <div class="space-y-6">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-2xl font-bold text-gray-800">My Claims</h2>
           <p class="text-gray-600">Track your insurance claims</p>
@@ -23,7 +23,7 @@ import { Claim } from '@core/models/models';
       </div>
     
       <!-- Filter Tabs -->
-      <div class="flex space-x-2">
+      <div class="flex space-x-2 overflow-x-auto pb-1 -mx-1 px-1">
         @for (status of filterOptions; track status) {
           <button
             (click)="filterStatus.set(status)"

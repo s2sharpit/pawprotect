@@ -16,12 +16,12 @@ import { Policy } from '@core/models/models';
       </div>
 
       <!-- Filter Tabs -->
-      <div class="flex space-x-2">
+      <div class="flex space-x-2 overflow-x-auto pb-1 -mx-1 px-1">
         @for (status of filterOptions; track status) {
         <button
           (click)="filterStatus = status"
           [class]="filterStatus === status ? 'bg-purple-500 text-white' : 'bg-white text-gray-700'"
-          class="px-6 py-2 rounded-lg font-semibold transition hover:shadow-lg"
+          class="px-5 py-2 rounded-lg font-semibold transition hover:shadow-lg whitespace-nowrap shrink-0"
         >
           {{ status }}
         </button>
@@ -38,15 +38,15 @@ import { Policy } from '@core/models/models';
 
             <!-- Policy Content -->
             <div class="flex-1 p-6">
-              <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center space-x-4">
+              <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                <div class="flex items-center space-x-3">
                   <div class="text-4xl">🐕</div>
                   <div>
                     <h3 class="text-xl font-bold text-gray-800">{{ policy.petName }}</h3>
                     <p class="text-gray-600">{{ policy.planName }}</p>
                   </div>
                 </div>
-                <span [class]="getStatusBadge(policy.status ?? '')">
+                <span [class]="getStatusBadge(policy.status ?? '')" class="shrink-0 text-sm">
                   {{ policy.status }}
                 </span>
               </div>

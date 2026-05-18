@@ -14,7 +14,7 @@ import { Policy } from '@core/models/models';
     <div class="max-w-4xl mx-auto space-y-6">
       <!-- Header -->
       <div class="bg-white rounded-2xl shadow-lg p-8">
-        <h2 class="text-3xl font-bold text-gray-800 mb-2">Submit Insurance Claim 📄</h2>
+        <h2 class="text-xl md:text-3xl font-bold text-gray-800 mb-2">Submit Insurance Claim 📄</h2>
         <p class="text-gray-600">Upload your vet receipt and AI will extract the details automatically</p>
       </div>
     
@@ -84,11 +84,11 @@ import { Policy } from '@core/models/models';
     
           <!-- Extracted Data (Editable) -->
           @if (extractedData) {
-            <div class="bg-white rounded-2xl shadow-lg p-8 space-y-6 animate-slide-down">
-              <div class="flex items-center justify-between mb-4">
+            <div class="bg-white rounded-2xl shadow-lg p-5 md:p-8 space-y-6 animate-slide-down">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <h3 class="text-xl font-bold text-gray-800">Extracted Information</h3>
-                <span class="bg-green-100 text-green-600 px-4 py-2 rounded-full font-semibold flex items-center">
-                  <span class="mr-2">✓</span> AI Extraction Complete
+                <span class="bg-green-100 text-green-600 px-3 py-1.5 rounded-full font-semibold flex items-center gap-1 whitespace-nowrap shrink-0 text-sm">
+                  <span>✓</span> AI Extraction Complete
                 </span>
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -172,7 +172,7 @@ import { Policy } from '@core/models/models';
     
                 <!-- Submit Buttons -->
                 <div class="bg-white rounded-2xl shadow-lg p-8">
-                  <div class="flex space-x-4">
+                  <div class="flex flex-col sm:flex-row gap-3">
                     <button
                       type="button"
                       [routerLink]="['/dashboard/claims']"

@@ -36,24 +36,24 @@ import { ClaimService } from '@core/services/claim.service';
             <div
               class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
               <!-- Claim Header -->
-              <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 border-b">
-                <div class="flex items-start justify-between">
-                  <div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-1">
+              <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 md:p-6 border-b">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-1">
                       Claim #{{ claim.id }} - {{ claim.petName }}
                     </h3>
-                    <p class="text-gray-600">
+                    <p class="text-gray-600 text-sm">
                       Policy #{{ claim.policyId }} • Submitted on {{ claim.createdAt | date:'mediumDate' }}
                     </p>
                   </div>
-                  <span [class]="getStatusBadge(claim.status)">
+                  <span [class]="getStatusBadge(claim.status)" class="shrink-0 text-sm">
                     {{ claim.status }}
                   </span>
                 </div>
               </div>
               <!-- Claim Details -->
-              <div class="p-6">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+              <div class="p-4 md:p-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div>
                     <p class="text-sm text-gray-600 mb-1">Treatment Date</p>
                     <p class="font-bold text-gray-800">{{ claim.treatmentDate | date:'mediumDate' }}</p>
