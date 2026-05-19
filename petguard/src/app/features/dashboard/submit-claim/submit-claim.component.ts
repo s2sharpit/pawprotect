@@ -1,10 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, effect } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { PolicyService } from '@core/services/policy.service';
 import { ClaimService } from '@core/services/claim.service';
 import { Policy } from '@core/models/models';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-submit-claim',
@@ -22,14 +22,20 @@ import { Policy } from '@core/models/models';
         <!-- Select Policy -->
         <div class="bg-white rounded-2xl shadow-lg p-8">
           <h3 class="text-xl font-bold text-gray-800 mb-4">Select Policy</h3>
-          <select formControlName="policyId" class="input-field">
-            <option value="">Choose a policy...</option>
-            @for (policy of policies; track policy) {
-              <option [value]="policy.id">
-                {{ policy.petName }} - {{ policy.planName }}
-              </option>
-            }
-          </select>
+          @if (policiesResource.isLoading()) {
+            <p class="text-gray-500 animate-pulse">Loading policies...</p>
+          } @else if (policiesResource.error()) {
+            <p class="text-red-500">Failed to load policies.</p>
+          } @else {
+            <select formControlName="policyId" class="input-field">
+              <option value="">Choose a policy...</option>
+              @for (policy of policiesResource.value() || []; track policy.id) {
+                <option [value]="policy.id">
+                  {{ policy.petName }} - {{ policy.planName }}
+                </option>
+              }
+            </select>
+          }
         </div>
     
         <!-- Upload Receipt -->
@@ -44,7 +50,7 @@ import { Policy } from '@core/models/models';
               (change)="onFileSelect($event)"
               accept=".pdf,.jpg,.jpeg,.png">
     
-              @if (!receiptFile) {
+              @if (!receiptFile()) {
                 <div>
                   <div class="text-6xl mb-4">📄</div>
                   <p class="text-xl font-semibold text-gray-800 mb-2">Click to upload receipt</p>
@@ -53,10 +59,10 @@ import { Policy } from '@core/models/models';
                 </div>
               }
     
-              @if (receiptFile && !extractedData) {
+              @if (receiptFile() && !extractedData()) {
                 <div>
                   <div class="text-6xl mb-4">✅</div>
-                  <p class="text-xl font-semibold text-purple-600 mb-2">{{ receiptFile.name }}</p>
+                  <p class="text-xl font-semibold text-purple-600 mb-2">{{ receiptFile()?.name }}</p>
                   <button type="button"
                     (click)="removeFile($event)"
                     class="text-red-600 hover:text-red-800 font-semibold">
@@ -67,7 +73,7 @@ import { Policy } from '@core/models/models';
             </div>
     
             <!-- AI Processing State -->
-            @if (isProcessingOCR) {
+            @if (isProcessingOCR()) {
               <div
                 class="mt-6 bg-purple-50 border-2 border-purple-200 rounded-xl p-8 text-center animate-pulse">
                 <div class="text-6xl mb-4">🤖</div>
@@ -83,7 +89,7 @@ import { Policy } from '@core/models/models';
           </div>
     
           <!-- Extracted Data (Editable) -->
-          @if (extractedData) {
+          @if (extractedData(); as data) {
             <div class="bg-white rounded-2xl shadow-lg p-5 md:p-8 space-y-6 animate-slide-down">
               <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <h3 class="text-xl font-bold text-gray-800">Extracted Information</h3>
@@ -157,10 +163,10 @@ import { Policy } from '@core/models/models';
                     <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
                       <div class="flex items-center justify-between mb-2">
                         <span class="font-semibold text-blue-900">AI Extraction Confidence</span>
-                        <span class="text-2xl font-bold text-blue-600">{{ extractedData.confidence }}%</span>
+                        <span class="text-2xl font-bold text-blue-600">{{ data.confidence }}%</span>
                       </div>
                       <div class="h-2 bg-blue-200 rounded-full overflow-hidden">
-                        <div [style.width.%]="extractedData.confidence"
+                        <div [style.width.%]="data.confidence"
                         class="h-full bg-blue-500 transition-all duration-500"></div>
                       </div>
                       <p class="text-sm text-blue-700 mt-2">
@@ -181,12 +187,12 @@ import { Policy } from '@core/models/models';
                     </button>
                     <button
                       type="submit"
-                      [disabled]="!extractedData || claimForm.invalid || isSubmitting"
+                      [disabled]="!extractedData() || claimForm.invalid || isSubmitting()"
                       class="btn-primary flex-1 disabled:opacity-50">
-                      @if (!isSubmitting) {
+                      @if (!isSubmitting()) {
                         <span>Submit Claim</span>
                       }
-                      @if (isSubmitting) {
+                      @if (isSubmitting()) {
                         <span class="flex items-center justify-center">
                           <svg class="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
@@ -200,7 +206,7 @@ import { Policy } from '@core/models/models';
                 </div>
               </form>
             </div>
-    `,
+  `,
   styles: [`
     @keyframes slide-down {
       from { opacity: 0; transform: translateY(-20px); }
@@ -212,19 +218,35 @@ import { Policy } from '@core/models/models';
   `]
 })
 export class SubmitClaimComponent implements OnInit {
-  claimForm!: FormGroup;
-  receiptFile: File | null = null;
-  isProcessingOCR = false;
-  extractedData: any = null;
-  isSubmitting = false;
-  policies: Policy[] = [];
-  loadingPolicies = false;
-  error: string | null = null;
-
   private policyService = inject(PolicyService);
   private claimService = inject(ClaimService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  claimForm!: FormGroup;
+  receiptFile = signal<File | null>(null);
+  isProcessingOCR = signal(false);
+  extractedData = signal<any>(null);
+  isSubmitting = signal(false);
+
+  policiesResource = rxResource({
+    stream: () => this.policyService.getPolicies()
+  });
+
+  constructor() {
+    effect(() => {
+      const policies = this.policiesResource.value();
+      const petIdParam = this.route.snapshot.queryParamMap.get('petId');
+      if (policies && petIdParam) {
+        const petId = +petIdParam;
+        const matchingPolicy = policies.find(p => p.petId === petId);
+        if (matchingPolicy) {
+          this.claimForm.patchValue({ policyId: matchingPolicy.id });
+        }
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.claimForm = this.fb.group({
@@ -236,47 +258,32 @@ export class SubmitClaimComponent implements OnInit {
       medications: [''],
       claimAmount: ['', [Validators.required, Validators.min(0)]]
     });
-    this.fetchPolicies();
-  }
-
-  fetchPolicies() {
-    this.loadingPolicies = true;
-    this.policyService.getPolicies().subscribe({
-      next: (data) => {
-        this.policies = data;
-        this.loadingPolicies = false;
-      },
-      error: (err) => {
-        this.error = 'Failed to load policies.';
-        this.loadingPolicies = false;
-      }
-    });
   }
 
   onFileSelect(event: any) {
     const file = event.target.files[0];
     if (file) {
-      this.receiptFile = file;
+      this.receiptFile.set(file);
       this.processReceiptWithOCR();
     }
   }
 
   removeFile(event: Event) {
     event.stopPropagation();
-    this.receiptFile = null;
-    this.extractedData = null;
+    this.receiptFile.set(null);
+    this.extractedData.set(null);
     this.claimForm.reset();
   }
 
   processReceiptWithOCR() {
-    this.isProcessingOCR = true;
+    this.isProcessingOCR.set(true);
 
     // Simulate AI OCR processing
     setTimeout(() => {
-      this.isProcessingOCR = false;
+      this.isProcessingOCR.set(false);
 
       // Mock extracted data
-      this.extractedData = {
+      const data = {
         confidence: 95,
         treatmentDate: '2024-12-20',
         vetClinicName: 'Happy Paws Veterinary Clinic',
@@ -286,14 +293,17 @@ export class SubmitClaimComponent implements OnInit {
         claimAmount: 450.00
       };
 
+      this.extractedData.set(data);
+
       // Populate form with extracted data
-      this.claimForm.patchValue(this.extractedData);
+      this.claimForm.patchValue(data);
     }, 3000);
   }
 
   onSubmit() {
-    if (this.claimForm.valid && this.receiptFile) {
-      this.isSubmitting = true;
+    const file = this.receiptFile();
+    if (this.claimForm.valid && file) {
+      this.isSubmitting.set(true);
       const formData = new FormData();
       formData.append('policyId', this.claimForm.value.policyId);
       formData.append('treatmentDate', this.claimForm.value.treatmentDate);
@@ -302,16 +312,16 @@ export class SubmitClaimComponent implements OnInit {
       formData.append('treatmentType', this.claimForm.value.treatmentType);
       formData.append('medications', this.claimForm.value.medications || '');
       formData.append('claimAmount', this.claimForm.value.claimAmount);
-      formData.append('receipt', this.receiptFile);
+      formData.append('receipt', file);
 
       this.claimService.submitClaim(formData).subscribe({
         next: () => {
-          this.isSubmitting = false;
+          this.isSubmitting.set(false);
           alert('Claim submitted successfully! 🎉');
           this.router.navigate(['/dashboard/claims']);
         },
         error: () => {
-          this.isSubmitting = false;
+          this.isSubmitting.set(false);
           alert('Failed to submit claim. Please try again.');
         }
       });
