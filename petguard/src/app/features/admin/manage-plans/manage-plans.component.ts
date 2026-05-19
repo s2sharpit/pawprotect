@@ -1,5 +1,4 @@
-
-import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -9,6 +8,7 @@ import {
 } from '@angular/forms';
 import { PlanService } from '@core/services/plan.service';
 import { InsurancePlan } from '@core/models/models';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-manage-plans',
@@ -147,78 +147,89 @@ import { InsurancePlan } from '@core/models/models';
                       <!-- Plans Table -->
                       <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
                         <div class="overflow-x-auto">
-                        <table class="w-full min-w-[600px]">
-                          <thead class="bg-gray-50 border-b-2 border-gray-200">
-                            <tr>
-                              <th class="text-left px-6 py-4 font-semibold text-gray-700">Plan Name</th>
-                              <th class="text-left px-6 py-4 font-semibold text-gray-700">Premium</th>
-                              <th class="text-left px-6 py-4 font-semibold text-gray-700">Coverage</th>
-                              <th class="text-left px-6 py-4 font-semibold text-gray-700">Deductible</th>
-                              <th class="text-left px-6 py-4 font-semibold text-gray-700">Status</th>
-                              <th class="text-right px-6 py-4 font-semibold text-gray-700">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            @for (plan of plans(); track plan) {
-                              <tr
-                                class="border-b border-gray-100 hover:bg-gray-50 transition"
-                                >
-                                <td class="px-6 py-4">
-                                  <div class="font-semibold text-gray-800">{{ plan.name }}</div>
-                                </td>
-                                <td class="px-6 py-4 font-semibold text-gray-800">\${{ plan.monthlyPremium }}/mo</td>
-                                <td class="px-6 py-4 font-semibold text-gray-800">
-                                  \${{ plan.coverageLimit.toLocaleString() }}
-                                </td>
-                                <td class="px-6 py-4 font-semibold text-gray-800">\${{ plan.deductible }}</td>
-                                <td class="px-6 py-4">
-                                  <span
-                  [class]="
-                    plan.isActive ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'
-                  "
-                                    class="px-3 py-1 rounded-full text-sm font-semibold"
-                                    >
-                                    {{ plan.isActive ? 'Active' : 'Inactive' }}
-                                  </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                  <div class="flex items-center justify-end space-x-2">
-                                    <button
-                                      (click)="editPlan(plan)"
-                                      class="text-blue-600 hover:text-blue-800 font-semibold"
-                                      >
-                                      Edit
-                                    </button>
-                                    <button
-                                      (click)="togglePlanStatus(plan)"
-                    [class]="
-                      plan.isActive
-                        ? 'text-red-600 hover:text-red-800'
-                        : 'text-green-600 hover:text-green-800'
-                    "
-                                      class="font-semibold"
-                                      >
-                                      {{ plan.isActive ? 'Deactivate' : 'Activate' }}
-                                    </button>
-                                  </div>
-                                </td>
+                        @if (plansResource.isLoading()) {
+                          <p class="p-6 text-gray-500 animate-pulse">Loading plans...</p>
+                        } @else if (plansResource.error()) {
+                          <p class="p-6 text-red-500">Failed to load plans.</p>
+                        } @else {
+                          <table class="w-full min-w-[600px]">
+                            <thead class="bg-gray-50 border-b-2 border-gray-200">
+                              <tr>
+                                <th class="text-left px-6 py-4 font-semibold text-gray-700">Plan Name</th>
+                                <th class="text-left px-6 py-4 font-semibold text-gray-700">Premium</th>
+                                <th class="text-left px-6 py-4 font-semibold text-gray-700">Coverage</th>
+                                <th class="text-left px-6 py-4 font-semibold text-gray-700">Deductible</th>
+                                <th class="text-left px-6 py-4 font-semibold text-gray-700">Status</th>
+                                <th class="text-right px-6 py-4 font-semibold text-gray-700">Actions</th>
                               </tr>
-                            }
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              @for (plan of plans(); track plan.id) {
+                                <tr
+                                  class="border-b border-gray-100 hover:bg-gray-50 transition"
+                                  >
+                                  <td class="px-6 py-4">
+                                    <div class="font-semibold text-gray-800">{{ plan.name }}</div>
+                                  </td>
+                                  <td class="px-6 py-4 font-semibold text-gray-800">\${{ plan.monthlyPremium }}/mo</td>
+                                  <td class="px-6 py-4 font-semibold text-gray-800">
+                                    \${{ plan.coverageLimit.toLocaleString() }}
+                                  </td>
+                                  <td class="px-6 py-4 font-semibold text-gray-800">\${{ plan.deductible }}</td>
+                                  <td class="px-6 py-4">
+                                    <span
+                    [class]="
+                      plan.isActive ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'
+                    "
+                                      class="px-3 py-1 rounded-full text-sm font-semibold"
+                                      >
+                                      {{ plan.isActive ? 'Active' : 'Inactive' }}
+                                    </span>
+                                  </td>
+                                  <td class="px-6 py-4">
+                                    <div class="flex items-center justify-end space-x-2">
+                                      <button
+                                        (click)="editPlan(plan)"
+                                        class="text-blue-600 hover:text-blue-800 font-semibold"
+                                        >
+                                        Edit
+                                      </button>
+                                      <button
+                                        (click)="togglePlanStatus(plan)"
+                      [class]="
+                        plan.isActive
+                          ? 'text-red-600 hover:text-red-800'
+                          : 'text-green-600 hover:text-green-800'
+                      "
+                                        class="font-semibold"
+                                        >
+                                        {{ plan.isActive ? 'Deactivate' : 'Activate' }}
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        }
                         </div>
                       </div>
                     </div>
-    `,
+  `,
 })
 export class ManagePlansComponent implements OnInit {
   showCreateForm = signal(false);
   editingPlan = signal<InsurancePlan | null>(null);
-  plans = signal<InsurancePlan[]>([]);
   planForm!: FormGroup;
 
   private fb = inject(FormBuilder);
   private planService = inject(PlanService);
+
+  plansResource = rxResource({
+    stream: () => this.planService.getPlans()
+  });
+
+  plans = computed(() => this.plansResource.value() || []);
 
   ngOnInit() {
     this.planForm = this.fb.group({
@@ -228,16 +239,6 @@ export class ManagePlansComponent implements OnInit {
       deductible: [null, [Validators.required, Validators.min(0)]],
       description: [''],
       isActive: [true],
-    });
-    this.loadPlans();
-  }
-
-  loadPlans() {
-    this.planService.getPlans().subscribe({
-      next: (plans) => this.plans.set(plans),
-      error: () => {
-        this.plans.set([]);
-      },
     });
   }
 
@@ -275,27 +276,24 @@ export class ManagePlansComponent implements OnInit {
     const formValue = this.planForm.value;
     if (this.editingPlan()) {
       this.planService.updatePlan(this.editingPlan()!.id, formValue).subscribe({
-        next: (updatedPlan) => {
-          // Replace the updated plan in the array
-          this.plans.update((plans) =>
-            plans.map((p) => (p.id === updatedPlan.id ? updatedPlan : p))
-          );
-          alert('Plan updated successfully!');
+        next: () => {
+          alert('Plan updated successfully! 🎉');
+          this.plansResource.reload();
           this.cancelForm();
         },
-        error: () => {
-          alert('Failed to update plan.');
+        error: (err) => {
+          alert('Failed to update plan: ' + (err.error?.message || err.message));
         },
       });
     } else {
       this.planService.createPlan(formValue).subscribe({
-        next: (createdPlan) => {
-          this.plans.update((plans) => [...plans, createdPlan]);
-          alert('Plan created successfully!');
+        next: () => {
+          alert('Plan created successfully! 🎉');
+          this.plansResource.reload();
           this.cancelForm();
         },
-        error: () => {
-          alert('Failed to create plan.');
+        error: (err) => {
+          alert('Failed to create plan: ' + (err.error?.message || err.message));
         },
       });
     }
@@ -304,9 +302,8 @@ export class ManagePlansComponent implements OnInit {
   togglePlanStatus(plan: InsurancePlan) {
     this.planService.updatePlanToggle(plan.id).subscribe({
       next: () => {
-        plan.isActive = !plan.isActive;
-        alert(`Plan ${plan.isActive ? 'activated' : 'deactivated'} successfully!`);
-        this.loadPlans();
+        alert(`Plan ${!plan.isActive ? 'activated' : 'deactivated'} successfully! 🎉`);
+        this.plansResource.reload();
       },
       error: (e) => {
         alert('Failed to update plan status.');

@@ -1,8 +1,8 @@
-
-import { Component, OnInit, inject, signal, computed } from "@angular/core";
+import { Component, inject, signal, computed } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { ClaimService } from '@core/services/claim.service';
 import { Claim } from '@core/models/models';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-my-claims',
@@ -36,89 +36,95 @@ import { Claim } from '@core/models/models';
     
       <!-- Claims List -->
       <div class="space-y-4">
-        @for (claim of filteredClaims(); track claim) {
-          <div
-            class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition p-6">
-            <!-- Header -->
-            <div class="flex items-start justify-between mb-6">
-              <div class="flex items-center space-x-4">
-                <div [class]="getStatusIcon(claim.status).color"
-                  class="w-12 h-12 rounded-full flex items-center justify-center text-2xl">
-                  {{ getStatusIcon(claim.status).icon }}
+        @if (claimsResource.isLoading()) {
+          <p class="text-gray-500 animate-pulse">Loading claims...</p>
+        } @else if (claimsResource.error()) {
+          <p class="text-red-500">Failed to load claims.</p>
+        } @else {
+          @for (claim of filteredClaims(); track claim.id) {
+            <div
+              class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition p-6">
+              <!-- Header -->
+              <div class="flex items-start justify-between mb-6">
+                <div class="flex items-center space-x-4">
+                  <div [class]="getStatusIcon(claim.status).color"
+                    class="w-12 h-12 rounded-full flex items-center justify-center text-2xl">
+                    {{ getStatusIcon(claim.status).icon }}
+                  </div>
+                  <div>
+                    <h3 class="text-xl font-bold text-gray-800">{{ claim.treatmentType }}</h3>
+                    <p class="text-gray-600">{{ claim.petName }} • {{ claim.treatmentDate }}</p>
+                  </div>
+                </div>
+                <span [class]="getStatusBadge(claim.status)">
+                  {{ claim.status }}
+                </span>
+              </div>
+              <!-- Progress Timeline -->
+              <div class="mb-6">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-semibold text-gray-700">Submitted</span>
+                  <span class="text-sm font-semibold text-gray-700">Processing</span>
+                  <span class="text-sm font-semibold text-gray-700">Decided</span>
+                </div>
+                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div [style.width.%]="getProgressWidth(claim.status)"
+                    [class]="getProgressColor(claim.status)"
+                    class="h-full transition-all duration-500">
+                  </div>
+                </div>
+              </div>
+              <!-- Claim Details Grid -->
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div>
+                  <p class="text-sm text-gray-600">Claim Amount</p>
+                  <p class="text-xl font-bold text-gray-800">\${{ claim.claimAmount }}</p>
                 </div>
                 <div>
-                  <h3 class="text-xl font-bold text-gray-800">{{ claim.treatmentType }}</h3>
-                  <p class="text-gray-600">{{ claim.petName }} • {{ claim.treatmentDate }}</p>
+                  <p class="text-sm text-gray-600">Approved Amount</p>
+                  <p class="text-xl font-bold text-green-600">
+                    {{ claim.approvedAmount ? '$' + claim.approvedAmount : '-' }}
+                  </p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-600">Deductible</p>
+                  <p class="text-xl font-bold text-gray-800">
+                    {{ claim.deductibleApplied ? '$' + claim.deductibleApplied : '-' }}
+                  </p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-600">Vet Clinic</p>
+                  <p class="text-sm font-bold text-gray-800">{{ claim.vetClinicName }}</p>
                 </div>
               </div>
-              <span [class]="getStatusBadge(claim.status)">
-                {{ claim.status }}
-              </span>
-            </div>
-            <!-- Progress Timeline -->
-            <div class="mb-6">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-semibold text-gray-700">Submitted</span>
-                <span class="text-sm font-semibold text-gray-700">Processing</span>
-                <span class="text-sm font-semibold text-gray-700">Decided</span>
-              </div>
-              <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div [style.width.%]="getProgressWidth(claim.status)"
-                  [class]="getProgressColor(claim.status)"
-                  class="h-full transition-all duration-500">
+              <!-- Decision Reason -->
+              @if (claim.decisionReason) {
+                <div
+                  [class]="claim.status === 'APPROVED' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'"
+                  class="border-2 rounded-lg p-4 mb-4">
+                  <p class="text-sm font-semibold text-gray-700 mb-1">Decision Reason</p>
+                  <p class="text-gray-700">{{ claim.decisionReason }}</p>
                 </div>
-              </div>
-            </div>
-            <!-- Claim Details Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div>
-                <p class="text-sm text-gray-600">Claim Amount</p>
-                <p class="text-xl font-bold text-gray-800">\${{ claim.claimAmount }}</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-600">Approved Amount</p>
-                <p class="text-xl font-bold text-green-600">
-                  {{ claim.approvedAmount ? '$' + claim.approvedAmount : '-' }}
-                </p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-600">Deductible</p>
-                <p class="text-xl font-bold text-gray-800">
-                  {{ claim.deductibleApplied ? '$' + claim.deductibleApplied : '-' }}
-                </p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-600">Vet Clinic</p>
-                <p class="text-sm font-bold text-gray-800">{{ claim.vetClinicName }}</p>
-              </div>
-            </div>
-            <!-- Decision Reason -->
-            @if (claim.decisionReason) {
-              <div
-                [class]="claim.status === 'APPROVED' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'"
-                class="border-2 rounded-lg p-4 mb-4">
-                <p class="text-sm font-semibold text-gray-700 mb-1">Decision Reason</p>
-                <p class="text-gray-700">{{ claim.decisionReason }}</p>
-              </div>
-            }
-            <!-- Actions -->
-            <div class="flex space-x-3">
-              <button class="flex-1 bg-purple-50 text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-purple-100 transition">
-                View Full Details
-              </button>
-              @if (claim.status === 'REJECTED') {
-                <button
-                  class="flex-1 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-100 transition">
-                  Appeal Decision
-                </button>
               }
+              <!-- Actions -->
+              <div class="flex space-x-3">
+                <button class="flex-1 bg-purple-50 text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-purple-100 transition">
+                  View Full Details
+                </button>
+                @if (claim.status === 'REJECTED') {
+                  <button
+                    class="flex-1 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-100 transition">
+                    Appeal Decision
+                  </button>
+                }
+              </div>
             </div>
-          </div>
+          }
         }
       </div>
     
       <!-- Empty State -->
-      @if (filteredClaims().length === 0) {
+      @if (!claimsResource.isLoading() && filteredClaims().length === 0) {
         <div
           class="bg-white rounded-2xl shadow-lg p-12 text-center">
           <div class="text-6xl mb-4">📄</div>
@@ -130,42 +136,24 @@ import { Claim } from '@core/models/models';
         </div>
       }
     </div>
-    `
+  `
 })
-export class MyClaimsComponent implements OnInit {
+export class MyClaimsComponent {
+  private claimService = inject(ClaimService);
+
   filterStatus = signal<'All' | 'PENDING' | 'PROCESSING' | 'APPROVED' | 'REJECTED'>('All');
   filterOptions: Array<'All' | 'PENDING' | 'PROCESSING' | 'APPROVED' | 'REJECTED'> = ['All', 'PENDING', 'PROCESSING', 'APPROVED', 'REJECTED'];
-  claims = signal<Claim[]>([]);
-  loading = signal(false);
-  error = signal<string | null>(null);
 
-  private claimService = inject(ClaimService);
+  claimsResource = rxResource({
+    stream: () => this.claimService.getClaims()
+  });
 
   filteredClaims = computed(() => {
     const status = this.filterStatus();
-    const allClaims = this.claims();
+    const allClaims = this.claimsResource.value() || [];
     if (status === 'All') return allClaims;
     return allClaims.filter(c => c.status === status);
   });
-
-  ngOnInit() {
-    this.fetchClaims();
-  }
-
-  fetchClaims() {
-    this.loading.set(true);
-    this.error.set(null);
-    this.claimService.getClaims().subscribe({
-      next: (data) => {
-        this.claims.set(data);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to load claims.');
-        this.loading.set(false);
-      }
-    });
-  }
 
   getStatusIcon(status: string) {
     const icons: any = {
