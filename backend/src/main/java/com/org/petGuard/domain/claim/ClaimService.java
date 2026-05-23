@@ -32,8 +32,11 @@ public class ClaimService {
     private AIService aiService;
 
     @Transactional
-    public ClaimResponse submitClaim(Long userId, Long policyId, MultipartFile receipt) {
-        Policy policy = policyRepository.findById(policyId)
+    public ClaimResponse submitClaim(
+            Long userId,
+            ClaimRequest request,
+            MultipartFile receipt) {
+        Policy policy = policyRepository.findById(request.getPolicyId())
                 .orElseThrow(() -> new RuntimeException("Policy not found"));
 
         if (!policy.getPet().getUser().getId().equals(userId)) {
@@ -46,13 +49,19 @@ public class ClaimService {
 
         Claim claim = Claim.builder()
                 .policy(policy)
-                .status(Claim.ClaimStatus.PROCESSING)
+                .treatmentDate(request.getTreatmentDate())
+                .vetClinicName(request.getVetClinicName())
+                .diagnosis(request.getDiagnosis())
+                .treatmentType(request.getTreatmentType())
+                .medications(request.getMedications())
+                .claimAmount(request.getClaimAmount())
+                .status(Claim.ClaimStatus.PENDING)
                 .build();
 
         claim = claimRepository.save(claim);
 
-        // Process receipt with AI
-        if (receipt != null && !receipt.isEmpty()) {
+        // Process receipt with AI only if details are missing
+        if (claim.getClaimAmount() == null && receipt != null && !receipt.isEmpty()) {
             try {
                 aiService.processClaimReceiptAsync(claim.getId(), receipt);
             } catch (Exception e) {
@@ -136,6 +145,8 @@ public class ClaimService {
                 .reviewedByName(claim.getReviewedBy() != null ? claim.getReviewedBy().getFullName() : null)
                 .reviewedAt(claim.getReviewedAt())
                 .createdAt(claim.getCreatedAt())
+                .userName(claim.getPolicy().getPet().getUser().getFullName())
+                .userEmail(claim.getPolicy().getPet().getUser().getEmail())
                 .build();
     }
 }

@@ -32,6 +32,25 @@ public class UserService {
     }
 
     private UserResponse mapToResponse(User user) {
+        List<UserResponse.UserPetDto> pets = user.getPets() == null ? List.of() : user.getPets().stream()
+                .map(pet -> UserResponse.UserPetDto.builder()
+                        .id(pet.getId())
+                        .name(pet.getName())
+                        .species(pet.getSpecies())
+                        .breed(pet.getBreed())
+                        .eligibilityStatus(pet.getEligibilityStatus() != null ? pet.getEligibilityStatus().name() : null)
+                        .policies(pet.getPolicies() == null ? List.of() : pet.getPolicies().stream()
+                                .map(policy -> UserResponse.UserPolicyDto.builder()
+                                        .id(policy.getId())
+                                        .planName(policy.getPlan().getName())
+                                        .status(policy.getStatus().name())
+                                        .startDate(policy.getStartDate())
+                                        .endDate(policy.getEndDate())
+                                        .build())
+                                .collect(Collectors.toList()))
+                        .build())
+                .collect(Collectors.toList());
+
         return UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -39,6 +58,7 @@ public class UserService {
                 .phone(user.getPhone())
                 .role(user.getRole().name())
                 .createdAt(user.getCreatedAt())
+                .pets(pets)
                 .build();
     }
 }

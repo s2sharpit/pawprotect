@@ -16,6 +16,7 @@ import { SubmitClaimComponent } from '@features/dashboard/submit-claim/submit-cl
 import { AdminDashboardComponent, AdminLayoutComponent } from '@features/admin/admin-layout.component';
 import { ManagePlansComponent } from '@features/admin/manage-plans/manage-plans.component';
 import { ReviewClaimsComponent } from '@features/admin/review-claims/review-claims.component';
+import { ManageUsersComponent } from '@features/admin/manage-users/manage-users.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -45,7 +46,7 @@ export const routes: Routes = [
       { path: '', component: AdminDashboardComponent },
       { path: 'plans', component: ManagePlansComponent },
       { path: 'claims', component: ReviewClaimsComponent },
-      // { path: 'users', component: ManageUsersComponent },
+      { path: 'users', component: ManageUsersComponent },
     ]
   },
   { path: '**', redirectTo: '' }

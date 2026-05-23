@@ -24,9 +24,9 @@ public class ClaimController {
     @PostMapping
     public ResponseEntity<ClaimResponse> submitClaim(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestParam Long policyId,
-            @RequestPart("receipt") MultipartFile receipt) {
-        return ResponseEntity.ok(claimService.submitClaim(principal.getUserId(), policyId, receipt));
+            @Valid @ModelAttribute ClaimRequest request,
+            @RequestParam("receipt") MultipartFile receipt) {
+        return ResponseEntity.ok(claimService.submitClaim(principal.getUserId(), request, receipt));
     }
 
     @GetMapping

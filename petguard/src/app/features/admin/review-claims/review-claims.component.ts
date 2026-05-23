@@ -48,9 +48,15 @@ import { map } from 'rxjs';
                       <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-1">
                         Claim #{{ claim.id }} - {{ claim.petName }}
                       </h3>
-                      <p class="text-gray-600 text-sm">
-                        Policy #{{ claim.policyId }} • Submitted on {{ claim.createdAt | date:'mediumDate' }}
-                      </p>
+                      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-gray-600 text-sm mt-1">
+                        <span>Policy #{{ claim.policyId }}</span>
+                        <span>•</span>
+                        <span class="flex items-center gap-1 font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-100">
+                          👤 {{ claim.userName }} ({{ claim.userEmail }})
+                        </span>
+                        <span>•</span>
+                        <span>Submitted on {{ claim.createdAt | date:'mediumDate' }}</span>
+                      </div>
                     </div>
                     <span [class]="getStatusBadge(claim.status)" class="shrink-0 text-sm">
                       {{ claim.status }}

@@ -37,5 +37,9 @@ export const API_ENDPOINTS = {
   },
   ADMIN: {
     STATS: `${BASE_URL}/dashboard/stats/global`,
+  },
+  USERS: {
+    BASE: `${BASE_URL}/users`,
+    byId: (id: number) => `${BASE_URL}/users/${id}`,
   }
 };

@@ -23,4 +23,6 @@ public class ClaimResponse {
     private String reviewedByName;
     private java.time.LocalDateTime reviewedAt;
     private java.time.LocalDateTime createdAt;
+    private String userName;
+    private String userEmail;
 }

@@ -18,4 +18,6 @@ export interface Claim {
   reviewedAt?: Date;
   createdAt: Date;
   policy?: Policy;
+  userName?: string;
+  userEmail?: string;
 }
