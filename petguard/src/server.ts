@@ -9,9 +9,31 @@ import { join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
+const allowedHosts = [
+  'localhost:4000',
+  'localhost',
+  '127.0.0.1',
+  'pawprotect.s2sharpit.dev',
+];
+
+const frontendUrl = typeof process !== 'undefined' ? process.env['APP_FRONTEND_URL'] : undefined;
+if (frontendUrl) {
+  try {
+    const url = new URL(frontendUrl);
+    if (!allowedHosts.includes(url.host)) {
+      allowedHosts.push(url.host);
+    }
+    if (!allowedHosts.includes(url.hostname)) {
+      allowedHosts.push(url.hostname);
+    }
+  } catch (e) {
+    // Ignore invalid URL
+  }
+}
+
 const app = express();
 const angularApp = new AngularNodeAppEngine({
-  allowedHosts: ['localhost:4000', 'localhost', '127.0.0.1'],
+  allowedHosts,
 });
 
 /**
