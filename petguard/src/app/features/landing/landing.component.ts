@@ -120,6 +120,18 @@ import { Router } from '@angular/router';
           </div>
         </div>
       </div>
+
+      <!-- Footer -->
+      <footer class="bg-black/15 border-t border-white/10 py-8 text-center text-white/80">
+        <div class="container mx-auto px-6">
+          <p class="text-sm">
+            &copy; 2026 PawProtect. All rights reserved.
+          </p>
+          <p class="text-xs mt-2 flex items-center justify-center gap-1">
+            Made with ❤️ by <a href="https://s2sharpit.dev" target="_blank" rel="noopener noreferrer" class="underline hover:text-white transition-colors">Tushar Saini</a>
+          </p>
+        </div>
+      </footer>
     </div>
     `,
   styles: [`
